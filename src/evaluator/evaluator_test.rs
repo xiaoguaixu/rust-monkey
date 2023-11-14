@@ -434,15 +434,15 @@ mod evaluator_test {
         let mut tests: Vec<ComValueExpect> = vec![];
 
         macro_fill_com_value_struct!(tests, "[1, 2, 3][0]", 1);
-        // macro_fill_com_value_struct!(tests, "[1, 2, 3][1]", 2);
-        // macro_fill_com_value_struct!(tests, "[1, 2, 3][2]", 3);
-        // macro_fill_com_value_struct!(tests, "let i = 0; [1][i];", 1);
-        // macro_fill_com_value_struct!(tests, "[1, 2, 3][1 + 1];", 3);
-        // macro_fill_com_value_struct!(tests, "let myArray = [1, 2, 3]; myArray[2];", 3);
-        // macro_fill_com_value_struct!(tests, "let myArray = [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];", 6);
-        // macro_fill_com_value_struct!(tests, "let myArray = [1, 2, 3]; let i = myArray[0]; myArray[i]", 2);
-        // macro_fill_com_value_struct!(tests, "[1, 2, 3][3]", 1);
-        // macro_fill_com_value_struct!(tests, "[1, 2, 3][-1]", 1);
+        macro_fill_com_value_struct!(tests, "[1, 2, 3][1]", 2);
+        macro_fill_com_value_struct!(tests, "[1, 2, 3][2]", 3);
+        macro_fill_com_value_struct!(tests, "let i = 0; [1][i];", 1);
+        macro_fill_com_value_struct!(tests, "[1, 2, 3][1 + 1];", 3);
+        macro_fill_com_value_struct!(tests, "let myArray = [1, 2, 3]; myArray[2];", 3);
+        macro_fill_com_value_struct!(tests, "let myArray = [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];", 6);
+        macro_fill_com_value_struct!(tests, "let myArray = [1, 2, 3]; let i = myArray[0]; myArray[i]", 2);
+        macro_fill_com_value_struct!(tests, "[1, 2, 3][3]", 1);
+        macro_fill_com_value_struct!(tests, "[1, 2, 3][-1]", 1);
 
         for v in tests {
             let evaluated = test_eval(v.input.as_str());
@@ -509,12 +509,12 @@ mod evaluator_test {
     fn test_hash_index_expressions() {
         let mut tests: Vec<ComValueExpect> = vec![];
         macro_fill_com_value_struct!(tests, r#"{"foo": 5}["foo"]"#,5);
-        // macro_fill_com_value_struct!(tests, r#"{"foo": 5}["bar"]"#,5);
-        // macro_fill_com_value_struct!(tests, r#"let key = "foo"; {"foo": 5}[key]"#,5);
-        // macro_fill_com_value_struct!(tests, r#"{}["foo"]"#,1);
-        // macro_fill_com_value_struct!(tests, r#"{5: 5}[5]"#,5);
-        // macro_fill_com_value_struct!(tests, r#"{true: 5}[true]"#,5);
-        // macro_fill_com_value_struct!(tests, r#"{false: 5}[false]"#,5);
+        macro_fill_com_value_struct!(tests, r#"{"foo": 5}["bar"]"#,5);
+        macro_fill_com_value_struct!(tests, r#"let key = "foo"; {"foo": 5}[key]"#,5);
+        macro_fill_com_value_struct!(tests, r#"{}["foo"]"#,1);
+        macro_fill_com_value_struct!(tests, r#"{5: 5}[5]"#,5);
+        macro_fill_com_value_struct!(tests, r#"{true: 5}[true]"#,5);
+        macro_fill_com_value_struct!(tests, r#"{false: 5}[false]"#,5);
 
         for v in tests {
             let evaluated = test_eval(v.input.as_str());
