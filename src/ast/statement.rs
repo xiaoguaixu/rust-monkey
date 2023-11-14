@@ -1,5 +1,5 @@
 use crate::{macro_node_trait_impl, token};
-use crate::ast::{ASTNode, Node};
+use crate::ast::ASTNode;
 
 macro_rules! macro_statement_trait_impl {
     ($impl_name:ident) => {
@@ -15,9 +15,9 @@ pub struct LetStatement {
     pub value: Box<ASTNode>,
 }
 
-impl Node for LetStatement {
+impl LetStatement {
     macro_node_trait_impl!(LetStatement);
-    fn string(&self) -> String {
+    pub fn string(&self) -> String {
         let mut rlt = format!("{} {}", self.token.literal, self.name.string());
         match &*self.value {
             ASTNode::Identifier(v) => {
@@ -37,9 +37,9 @@ pub struct ReturnStatement {
     pub return_value: Box<ASTNode>,
 }
 
-impl Node for ReturnStatement {
+impl ReturnStatement {
     macro_node_trait_impl!(ReturnStatement);
-    fn string(&self) -> String {
+    pub fn string(&self) -> String {
         match *self.return_value {
             ASTNode::None => {
                 format!("{} ;", self.token.literal)
@@ -59,9 +59,9 @@ pub struct ExpressionStatement {
     pub expression: Box<ASTNode>,
 }
 
-impl Node for ExpressionStatement {
+impl ExpressionStatement {
     macro_node_trait_impl!(ExpressionStatement);
-    fn string(&self) -> String {
+    pub fn string(&self) -> String {
         self.expression.string()
     }
 }
@@ -74,9 +74,9 @@ pub struct BlockStatement {
     pub statements: Vec<ASTNode>,
 }
 
-impl Node for BlockStatement {
+impl BlockStatement {
     macro_node_trait_impl!(BlockStatement);
-    fn string(&self) -> String {
+    pub fn string(&self) -> String {
         let mut rlt: String = "".to_string();
         for v in &self.statements {
             rlt = rlt + v.string().as_str();

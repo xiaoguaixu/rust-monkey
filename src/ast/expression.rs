@@ -1,6 +1,5 @@
 use crate::{macro_node_trait_impl, token};
 use crate::ast::ASTNode;
-use crate::ast::base::*;
 
 macro_rules! express_trait_impl {
     ($impl_name:ident) => {
@@ -14,9 +13,9 @@ pub struct Identifier {
     pub value: String,
 }
 
-impl Node for Identifier {
+impl Identifier {
     macro_node_trait_impl!(Identifier);
-    fn string(&self) -> String {
+    pub fn string(&self) -> String {
         self.value.clone()
     }
 }
@@ -30,10 +29,10 @@ pub struct Boolean {
     pub value: bool,
 }
 
-impl Node for Boolean {
+impl Boolean {
     macro_node_trait_impl!(Boolean);
 
-    fn string(&self) -> String {
+    pub fn string(&self) -> String {
         self.token.literal.clone()
     }
 }
@@ -46,10 +45,10 @@ pub struct IntegerLiteral {
     pub value: i64,
 }
 
-impl Node for IntegerLiteral {
+impl IntegerLiteral {
     macro_node_trait_impl!(IntegerLiteral);
 
-    fn string(&self) -> String {
+    pub fn string(&self) -> String {
         self.token.literal.clone()
     }
 }
@@ -63,10 +62,10 @@ pub struct PrefixExpression {
     pub right: Box<ASTNode>,
 }
 
-impl Node for PrefixExpression {
+impl PrefixExpression {
     macro_node_trait_impl!(PrefixExpression);
 
-    fn string(&self) -> String {
+    pub fn string(&self) -> String {
         format!("({}{})", self.operator, self.right.string())
     }
 }
@@ -82,10 +81,10 @@ pub struct InfixExpression {
     pub right: Box<ASTNode>,
 }
 
-impl Node for InfixExpression {
+impl InfixExpression {
     macro_node_trait_impl!(InfixExpression);
 
-    fn string(&self) -> String {
+    pub fn string(&self) -> String {
         format!("({} {} {})", self.left.string(), self.operator, self.right.string())
     }
 }
@@ -100,10 +99,10 @@ pub struct IfExpression {
     pub alternative: Box<ASTNode>,
 }
 
-impl Node for IfExpression {
+impl IfExpression {
     macro_node_trait_impl!(IfExpression);
 
-    fn string(&self) -> String {
+    pub fn string(&self) -> String {
         let mut rlt = format!("if {} {}", self.condition.string(), self.consequence.string());
         match *self.alternative {
             ASTNode::None => {}
@@ -124,10 +123,10 @@ pub struct FunctionLiteral {
     pub body: Box<ASTNode>,
 }
 
-impl Node for FunctionLiteral {
+impl FunctionLiteral {
     macro_node_trait_impl!(FunctionLiteral);
 
-    fn string(&self) -> String {
+    pub fn string(&self) -> String {
         let mut params: Vec<String> = Vec::new();
         for v in &self.parameters {
             params.push(v.string());
@@ -146,9 +145,9 @@ pub struct CallExpression {
 }
 
 
-impl Node for CallExpression {
+impl CallExpression {
     macro_node_trait_impl!(CallExpression);
-    fn string(&self) -> String {
+    pub fn string(&self) -> String {
         let mut args: Vec<String> = Vec::new();
         for v in &self.arguments {
             args.push(v.string());
@@ -166,9 +165,9 @@ pub struct StringLiteral {
     pub value: String,
 }
 
-impl Node for StringLiteral {
+impl StringLiteral {
     macro_node_trait_impl!(StringLiteral);
-    fn string(&self) -> String {
+    pub fn string(&self) -> String {
         self.token.literal.clone()
     }
 }
@@ -181,9 +180,9 @@ pub struct ArrayLiteral {
     pub elements: Vec<ASTNode>,
 }
 
-impl Node for ArrayLiteral {
+impl ArrayLiteral {
     macro_node_trait_impl!(ArrayLiteral);
-    fn string(&self) -> String {
+    pub fn string(&self) -> String {
         let mut elements: Vec<String> = Vec::new();
         for v in &self.elements {
             elements.push(v.string());
@@ -201,9 +200,9 @@ pub struct IndexExpression {
     pub index: Box<ASTNode>,
 }
 
-impl Node for IndexExpression {
+impl IndexExpression {
     macro_node_trait_impl!(IndexExpression);
-    fn string(&self) -> String {
+    pub fn string(&self) -> String {
         format!("({}[{}])", self.left.string(), self.index.string())
     }
 }
@@ -216,9 +215,9 @@ pub struct HashLiteral {
     pub pairs: Vec<(Box<ASTNode>, Box<ASTNode>)>,
 }
 
-impl Node for HashLiteral {
+impl HashLiteral {
     macro_node_trait_impl!(HashLiteral);
-    fn string(&self) -> String {
+    pub fn string(&self) -> String {
         let mut pairs: Vec<String> = Vec::new();
         for (key, value) in self.pairs.iter() {
             pairs.push(key.string() + ":" + value.string().as_str());

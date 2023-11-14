@@ -1,8 +1,9 @@
 use std::collections::HashMap;
-//use phf::phf_map;
 
 use crate::const_str_val_declare;
 use crate::token;
+
+//use phf::phf_map;
 
 const_str_val_declare!(ILLEGAL, "ILLEGAL");
 const_str_val_declare!(EOF, "EOF");
@@ -69,7 +70,7 @@ pub struct Token {
 // 	"return" => RETURN,
 // };
 
-thread_local!{
+thread_local! {
     pub static KEYWORDS: HashMap<&'static str, &'static str> =HashMap::from([
         ("fn" , FUNCTION),
         ("let" ,    LET),

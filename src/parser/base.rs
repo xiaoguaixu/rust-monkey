@@ -6,7 +6,6 @@ use phf::phf_map;
 use crate::{lexer, token};
 use crate::ast::ASTNode;
 
-
 #[repr(i32)]
 pub enum Precedence {
     LOWEST = 1,
