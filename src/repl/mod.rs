@@ -20,7 +20,7 @@ pub fn start() {
         }
 
         let evaluated = eval(&program, &mut env);
-        if !evaluated.is_none() {
+        if !evaluated.is_null() && !evaluated.is_none() {
             println!("{}", evaluated.inspect());
         }
     }

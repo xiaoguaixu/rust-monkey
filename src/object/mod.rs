@@ -37,6 +37,13 @@ impl ValueObject {
         };
     }
 
+    pub fn is_null(&self) -> bool {
+        return match self {
+            ValueObject::NULL => { true }
+            _ => { false }
+        };
+    }
+
     #[allow(dead_code)]
     pub fn as_int(&self) -> i64 {
         return match self {

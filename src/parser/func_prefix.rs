@@ -163,7 +163,7 @@ pub fn parse_hash_literal(context: &mut Box<ParseContext>) -> ASTNode {
         pairs: vec![],
     };
 
-    while !context.expect_peek(token::RBRACE) {
+    while !context.peek_token_is(token::RBRACE) {
         context.next_token();
         let key = parse_expression(context, Precedence::LOWEST as i32);
         if key.is_none() {
@@ -186,6 +186,7 @@ pub fn parse_hash_literal(context: &mut Box<ParseContext>) -> ASTNode {
             return ASTNode::None;
         }
     }
+    context.next_token();
 
     ASTNode::HashLiteral(expression)
 }
