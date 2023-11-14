@@ -21,7 +21,6 @@ pub enum ValueObject {
     ReturnValue(ReturnValue),
     Error(String),
     Function(Function),
-    #[allow(dead_code)]
     Builtin(Builtin),
     Array(Array),
     Hash(Hash),

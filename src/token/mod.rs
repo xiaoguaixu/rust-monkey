@@ -70,9 +70,7 @@ pub struct Token {
 // 	"return" => RETURN,
 // };
 
-/**
- 弃用 phf_map, 修改成 thread_local!
-*/
+
 thread_local! {
     pub static KEYWORDS: HashMap<&'static str, &'static str> =HashMap::from([
         ("fn" , FUNCTION),
