@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod parse_test {
     use crate::ast;
-    use crate::ast::{ASTNode, Node};
+    use crate::ast::{ASTNode};
     use crate::lexer::Lexer;
     use crate::parser::Parser;
     use crate::util::{Overloaded, VariantValue};
