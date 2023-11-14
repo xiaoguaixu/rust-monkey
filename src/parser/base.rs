@@ -6,7 +6,7 @@ use phf::phf_map;
 use crate::{lexer, token};
 use crate::ast::ASTNode;
 
-#[allow(dead_code)]
+
 #[repr(i32)]
 pub enum Precedence {
     LOWEST = 1,
@@ -20,6 +20,7 @@ pub enum Precedence {
     // *
     PREFIX,
     // -X or !X
+    #[allow(dead_code)]
     CALL,
     // myFunction(X)
     INDEX,       // array[index]
@@ -43,7 +44,6 @@ static PRECEDENCES: phf::Map<&str, i32> = phf_map! {
 pub type PrefixParseFn = dyn Fn(&mut Box<ParseContext>) -> ASTNode;
 pub type InfixParseFn = dyn Fn(&mut Box<ParseContext>, ASTNode) -> ASTNode;
 
-#[derive(Default)]
 pub struct ParseContext {
     pub l: Box<lexer::Lexer>,
     pub errors: Vec<String>,
@@ -53,7 +53,6 @@ pub struct ParseContext {
     pub infix_parse_fns: HashMap<token::TokenType, Rc<InfixParseFn>>,
 }
 
-#[allow(dead_code)]
 impl ParseContext {
     pub fn new(l: Box<lexer::Lexer>) -> Self {
         let mut rlt = Self {
@@ -136,11 +135,12 @@ impl ParseContext {
             self.next_token();
             true
         } else {
+            self.peek_error(&t);
             false
         }
     }
 
-    pub fn peek_error(&mut self, t: &token::TokenType) {
+    pub fn peek_error(&mut self, t: &str) {
         let msg = format!("expected next token to be {}, got {} instead",
                           t, self.peek_token.token_type);
 
@@ -151,6 +151,7 @@ impl ParseContext {
         self.errors.push(msg.to_string());
     }
 
+    #[allow(dead_code)]
     pub fn errors(&self) -> Vec<String> {
         self.errors.clone()
     }

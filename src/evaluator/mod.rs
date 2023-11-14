@@ -10,7 +10,6 @@ mod evaluator_test;
 mod base;
 mod builtins;
 
-#[allow(dead_code)]
 pub fn eval(node: &ASTNode, env: &mut object::Environment) -> ValueObject {
     match node {
         ASTNode::Program(_) => {

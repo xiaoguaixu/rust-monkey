@@ -23,7 +23,6 @@ impl Environment {
         }
     }
 
-    #[allow(dead_code)]
     pub fn get(&self, name: &str) -> Option<&Box<ValueObject>> {
         return match self.store.get(name) {
             None => {
@@ -38,7 +37,6 @@ impl Environment {
         };
     }
 
-    #[allow(dead_code)]
     pub fn set(&mut self, name: &str, value: Box<ValueObject>) {
         self.store.insert(name.to_string(), value);
     }

@@ -4,7 +4,6 @@ use crate::evaluator::base::new_error;
 use crate::object;
 use crate::object::{BuiltinFunction, ValueObject};
 
-#[allow(dead_code)]
 fn len(args: &Vec<ValueObject>) -> ValueObject {
     if args.len() != 1 {
         return new_error(format!("wrong number of arguments. got={}, want=1", args.len()));
@@ -24,7 +23,6 @@ fn len(args: &Vec<ValueObject>) -> ValueObject {
     };
 }
 
-#[allow(dead_code)]
 fn puts(args: &Vec<ValueObject>) -> ValueObject {
     for v in args {
         println!("{}", v.inspect());
@@ -32,7 +30,6 @@ fn puts(args: &Vec<ValueObject>) -> ValueObject {
     ValueObject::NULL
 }
 
-#[allow(dead_code)]
 fn first(args: &Vec<ValueObject>) -> ValueObject {
     if args.len() != 1 {
         return new_error(format!("wrong number of arguments. got={}, want=1", args.len()));
@@ -53,7 +50,6 @@ fn first(args: &Vec<ValueObject>) -> ValueObject {
     };
 }
 
-#[allow(dead_code)]
 fn last(args: &Vec<ValueObject>) -> ValueObject {
     if args.len() != 1 {
         return new_error(format!("wrong number of arguments. got={}, want=1", args.len()));
@@ -74,7 +70,6 @@ fn last(args: &Vec<ValueObject>) -> ValueObject {
     };
 }
 
-#[allow(dead_code)]
 fn rest(args: &Vec<ValueObject>) -> ValueObject {
     if args.len() != 1 {
         return new_error(format!("wrong number of arguments. got={}, want=1", args.len()));
@@ -102,7 +97,6 @@ fn rest(args: &Vec<ValueObject>) -> ValueObject {
     };
 }
 
-#[allow(dead_code)]
 fn push(args: &Vec<ValueObject>) -> ValueObject {
     if args.len() != 2 {
         return new_error(format!("wrong number of arguments. got={}, want=2", args.len()));
@@ -126,7 +120,6 @@ fn push(args: &Vec<ValueObject>) -> ValueObject {
     };
 }
 
-#[allow(dead_code)]
 pub fn get_builtin_fn(key: &str) -> Option<Rc<BuiltinFunction>> {
     return match key {
         "len" => { Some(Rc::new(len)) }

@@ -154,7 +154,6 @@ impl Function {
 }
 
 #[derive(Clone)]
-#[allow(dead_code)]
 pub struct Builtin {
     pub func: Rc<BuiltinFunction>,
 }
