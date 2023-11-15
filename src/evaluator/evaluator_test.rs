@@ -189,13 +189,15 @@ mod evaluator_test {
         macro_fill_com_value_struct!(tests, r#"if (10 > 1) { true + false; }"#,
 			"unknown operator: BOOLEAN + BOOLEAN"
 		);
-        macro_fill_com_value_struct!(tests, r#"if (10 > 1) {
-  if (10 > 1) {
-    return true + false;
-  }
+        macro_fill_com_value_struct!(tests, r#"
+            if (10 > 1) {
+              if (10 > 1) {
+                return true + false;
+              }
 
-  return 1;
-}"#,
+              return 1;
+            }
+            "#,
 			"unknown operator: BOOLEAN + BOOLEAN"
 		);
         macro_fill_com_value_struct!(tests, r#"foobar"#,
@@ -511,7 +513,7 @@ mod evaluator_test {
         macro_fill_com_value_struct!(tests, r#"{"foo": 5}["foo"]"#,5);
         macro_fill_com_value_struct!(tests, r#"{"foo": 5}["bar"]"#,5);
         macro_fill_com_value_struct!(tests, r#"let key = "foo"; {"foo": 5}[key]"#,5);
-        macro_fill_com_value_struct!(tests, r#"{}["foo"]"#,1);
+        macro_fill_com_value_struct!(tests, r#"{}["foo"]"#,NIL);
         macro_fill_com_value_struct!(tests, r#"{5: 5}[5]"#,5);
         macro_fill_com_value_struct!(tests, r#"{true: 5}[true]"#,5);
         macro_fill_com_value_struct!(tests, r#"{false: 5}[false]"#,5);
