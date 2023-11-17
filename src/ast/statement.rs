@@ -45,7 +45,7 @@ impl ReturnStatement {
                 format!("{} ;", self.token.literal)
             }
             _ => {
-                format!("{} {} ", self.token.literal, self.token_literal())
+                format!("{} {} ", self.token.literal, self.return_value.token_literal())
             }
         }
     }
