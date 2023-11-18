@@ -70,14 +70,14 @@ impl ParseContext {
 
     pub fn register_prefix<F>(&mut self, key: &str, func: F)
         where
-            F: Fn(&mut Box<ParseContext>) -> Option<Rc<dyn ast::Expression>> + 'static,
+            F: Fn(&mut Box<ParseContext>) -> Option<Rc<dyn ast::Expression>> + 'static
     {
         self.prefix_parse_fns.insert(key.to_string(), Rc::new(func));
     }
 
     pub fn register_infix<F>(&mut self, key: &str, func: F)
         where
-            F: Fn(&mut Box<ParseContext>, Rc<dyn ast::Expression>) -> Option<Rc<dyn ast::Expression>> + 'static,
+            F: Fn(&mut Box<ParseContext>, Rc<dyn ast::Expression>) -> Option<Rc<dyn ast::Expression>> + 'static
     {
         self.infix_parse_fns.insert(key.to_string(), Rc::new(func));
     }

@@ -20,7 +20,7 @@ pub fn parse_program(context: &mut Box<ParseContext>) -> Box<ast::Program> {
     program
 }
 
-pub fn parse_statement(context: &mut Box<ParseContext>) -> Option<Box<dyn ast::Statement>> {
+pub fn parse_statement(context: &mut Box<ParseContext>) -> Option<Rc<dyn ast::Statement>> {
     match context.cur_token.token_type.as_str() {
         token::LET => {
             parse_let_statement(context)
@@ -34,7 +34,7 @@ pub fn parse_statement(context: &mut Box<ParseContext>) -> Option<Box<dyn ast::S
     }
 }
 
-pub fn parse_let_statement(context: &mut Box<ParseContext>) -> Option<Box<dyn ast::Statement>> {
+pub fn parse_let_statement(context: &mut Box<ParseContext>) -> Option<Rc<dyn ast::Statement>> {
     let mut statement = ast::LetStatement {
         token: context.cur_token.clone(),
         name: Rc::new(Default::default()),
@@ -62,10 +62,10 @@ pub fn parse_let_statement(context: &mut Box<ParseContext>) -> Option<Box<dyn as
         context.next_token();
     }
 
-    Some(Box::new(statement))
+    Some(Rc::new(statement))
 }
 
-pub fn parse_return_statement(context: &mut Box<ParseContext>) -> Option<Box<dyn ast::Statement>> {
+pub fn parse_return_statement(context: &mut Box<ParseContext>) -> Option<Rc<dyn ast::Statement>> {
     let mut statement = ast::ReturnStatement {
         token: context.cur_token.clone(),
         return_value: None,
@@ -78,10 +78,10 @@ pub fn parse_return_statement(context: &mut Box<ParseContext>) -> Option<Box<dyn
         context.next_token();
     }
 
-    Some(Box::new(statement))
+    Some(Rc::new(statement))
 }
 
-pub fn parse_expression_statement(context: &mut Box<ParseContext>) -> Option<Box<dyn ast::Statement>> {
+pub fn parse_expression_statement(context: &mut Box<ParseContext>) -> Option<Rc<dyn ast::Statement>> {
     let token = context.cur_token.clone();
     let expression = match parse_expression(context, Precedence::LOWEST as i32) {
         None => {
@@ -99,7 +99,7 @@ pub fn parse_expression_statement(context: &mut Box<ParseContext>) -> Option<Box
         context.next_token();
     }
 
-    Some(Box::new(statement))
+    Some(Rc::new(statement))
 }
 
 pub fn parse_block_statement(context: &mut Box<ParseContext>) -> Option<Rc<dyn ast::Statement>> {

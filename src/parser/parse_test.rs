@@ -466,7 +466,7 @@
 //         true
 //     }
 //
-//     fn check_boolean_literal(expression: &Box<dyn ast::Expression>, value: bool) -> bool {
+//     fn check_boolean_literal(expression: &Rc<dyn ast::Expression>, value: bool) -> bool {
 //         let expression = Boolean::from_expression(expression).unwrap();
 //         if expression.value != value {
 //             println!("integ.Value not {}. got={}", value, expression.value);

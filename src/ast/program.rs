@@ -1,9 +1,10 @@
 use std::any::Any;
+use std::rc::Rc;
 
 use crate::ast::base::*;
 
 pub struct Program {
-    pub statements: Vec<Box<dyn Statement>>,
+    pub statements: Vec<Rc<dyn Statement>>,
 }
 
 macro_rules! macro_program_trait_impl {

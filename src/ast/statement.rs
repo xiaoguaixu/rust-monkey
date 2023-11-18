@@ -18,14 +18,14 @@ macro_rules! macro_statement_trait_impl {
 
         impl $impl_name {
             #[allow(dead_code)]
-            pub fn from_statement<'a>(statement: &'a Box<dyn Statement> ) -> Option<& 'a $impl_name> {
+            pub fn from_statement<'a>(statement: &'a Rc<dyn Statement> ) -> Option<& 'a $impl_name> {
                 match statement.as_any().downcast_ref::<$impl_name>() {
                     None => {None}
                     Some(v) => {Some(v)}
                 }
             }
 
-            pub fn from_node<'a>(node: &'a Box<dyn Node>) -> Option<& 'a $impl_name> {
+            pub fn from_node<'a>(node: &'a Rc<dyn Node>) -> Option<& 'a $impl_name> {
                 match node.as_any().downcast_ref::<$impl_name>() {
                     None => {None}
                     Some(v) => {Some(v)}
@@ -94,7 +94,7 @@ macro_statement_trait_impl!(ExpressionStatement);
 
 pub struct BlockStatement {
     pub token: token::Token,
-    pub statements: Vec<Box<dyn Statement>>,
+    pub statements: Vec<Rc<dyn Statement>>,
 }
 
 impl Node for BlockStatement {
