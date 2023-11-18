@@ -471,8 +471,3 @@ fn extend_function_env(func: &object::Function, args: &Vec<Rc<dyn object::Object
     env
 }
 
-
-// pub fn eval_program(node: &Box<ast::Program>, env: &mut object::Environment) -> Box<dyn object::Object> {
-//     todo!()
-// }
-
