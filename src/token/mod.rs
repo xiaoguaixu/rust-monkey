@@ -1,9 +1,7 @@
-use std::collections::HashMap;
+use phf::phf_map;
 
 use crate::const_str_val_declare;
 use crate::token;
-
-//use phf::phf_map;
 
 const_str_val_declare!(ILLEGAL, "ILLEGAL");
 const_str_val_declare!(EOF, "EOF");
@@ -60,43 +58,23 @@ pub struct Token {
     pub literal: String,
 }
 
-// static KEYWORDS: phf::Map<&'static str, &'static str> = phf_map! {
-//     "fn" => FUNCTION,
-// 	"let" =>    LET,
-// 	"true" =>   TRUE,
-// 	"false" =>  FALSE,
-// 	"if" =>     IF,
-// 	"else" =>   ELSE,
-// 	"return" => RETURN,
-// };
-
-
-thread_local! {
-    pub static KEYWORDS: HashMap<&'static str, &'static str> =HashMap::from([
-        ("fn" , FUNCTION),
-        ("let" ,    LET),
-        ("true" ,   TRUE),
-        ("false" ,  FALSE),
-        ("if" ,     IF),
-        ("else" ,   ELSE),
-        ("return" , RETURN),
-    ])
-}
+static KEYWORDS: phf::Map<&'static str, &'static str> = phf_map! {
+    "fn" => FUNCTION,
+	"let" =>    LET,
+	"true" =>   TRUE,
+	"false" =>  FALSE,
+	"if" =>     IF,
+	"else" =>   ELSE,
+	"return" => RETURN,
+};
 
 
 pub fn lookup_ident(ident: &String) -> TokenType {
-    // match KEYWORDS.get(ident.as_str()) {
-    //     Some(v) => {
-    //         v.to_string()
-    //     }
-    //     None => token::IDENT.to_string()
-    // }
-
-    KEYWORDS.with(|val| {
-        if let Some(v) = val.get(ident.as_str()) {
-            return v.to_string();
+    match KEYWORDS.get(ident.as_str()) {
+        Some(v) => {
+            v.to_string()
         }
-        return token::IDENT.to_string();
-    })
+        None => token::IDENT.to_string()
+    }
 }
 

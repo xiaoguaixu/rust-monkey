@@ -1,5 +1,4 @@
-use crate::{lexer, token};
-use crate::ast::ASTNode;
+use crate::{ast, lexer, token};
 use crate::parser::base::ParseContext;
 use crate::parser::func::parse_program;
 use crate::parser::func_infix::*;
@@ -31,7 +30,7 @@ impl Parser {
         parser
     }
 
-    pub fn parse_program(&mut self) -> ASTNode {
+    pub fn parse_program(&mut self) -> Box<ast::Program> {
         parse_program(&mut self.parse_context)
     }
 

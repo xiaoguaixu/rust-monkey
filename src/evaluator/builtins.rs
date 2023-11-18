@@ -2,121 +2,125 @@ use std::rc::Rc;
 
 use crate::evaluator::base::new_error;
 use crate::object;
-use crate::object::{BuiltinFunction, ValueObject};
+use crate::object::{BuiltinFunction};
 
-fn len(args: &Vec<ValueObject>) -> ValueObject {
+fn len(args: &Vec<Rc<dyn object::Object>>) -> Option<Rc<dyn object::Object>> {
     if args.len() != 1 {
         return new_error(format!("wrong number of arguments. got={}, want=1", args.len()));
     }
 
-    return match &args[0] {
-        ValueObject::Array(v) => {
-            ValueObject::Integer(v.elements.len() as i64)
-        }
-        ValueObject::StringValue(v) => {
-            ValueObject::Integer(v.len() as i64)
-        }
-        _ => {
-            new_error(format!("argument to `len` not supported, got {}",
-                              args[0].object_type()))
-        }
-    };
+    let any = args[0].as_any();
+
+    return if any.is::<object::Array>() {
+        let value = any.downcast_ref::<object::Array>().unwrap();
+        Some(Rc::new(object::Integer {
+            value: value.elements.len() as i64,
+        }))
+    } else if any.is::<object::StringValue>() {
+        let value = any.downcast_ref::<object::StringValue>().unwrap();
+        Some(Rc::new(object::Integer {
+            value: value.value.len() as i64,
+        }))
+    } else {
+        new_error(format!("argument to `len` not supported, got {}",
+                          args[0].object_type()))
+    }
 }
 
-fn puts(args: &Vec<ValueObject>) -> ValueObject {
+fn puts(args: &Vec<Rc<dyn object::Object>>) -> Option<Rc<dyn object::Object>> {
     for v in args {
         println!("{}", v.inspect());
     }
-    ValueObject::NULL
+    None
 }
 
-fn first(args: &Vec<ValueObject>) -> ValueObject {
+fn first(args: &Vec<Rc<dyn object::Object>>) -> Option<Rc<dyn object::Object>>{
     if args.len() != 1 {
         return new_error(format!("wrong number of arguments. got={}, want=1", args.len()));
     }
 
-    return match &args[0] {
-        ValueObject::Array(v) => {
-            if v.elements.len() > 0 {
-                v.elements[0].clone()
-            } else {
-                ValueObject::NULL
-            }
+    let any = args[0].as_any();
+
+    return if any.is::<object::Array>() {
+        let v = any.downcast_ref::<object::Array>().unwrap();
+        if v.elements.len() > 0 {
+            Some(v.elements[0].clone())
+        } else {
+            None
         }
-        _ => {
-            new_error(format!("argument to `first` must be ARRAY, got {}",
-                              args[0].object_type()))
-        }
+    } else {
+        new_error(format!("argument to `first` must be ARRAY, got {}",
+                          args[0].object_type()))
     };
 }
 
-fn last(args: &Vec<ValueObject>) -> ValueObject {
+fn last(args: &Vec<Rc<dyn object::Object>>) -> Option<Rc<dyn object::Object>> {
     if args.len() != 1 {
         return new_error(format!("wrong number of arguments. got={}, want=1", args.len()));
     }
 
-    return match &args[0] {
-        ValueObject::Array(v) => {
-            if v.elements.len() > 1 {
-                v.elements[v.elements.len() - 1].clone()
-            } else {
-                ValueObject::NULL
-            }
+    let any = args[0].as_any();
+
+    return if any.is::<object::Array>() {
+        let v = any.downcast_ref::<object::Array>().unwrap();
+        if v.elements.len() > 1 {
+            Some(v.elements[v.elements.len() - 1].clone())
+        } else {
+            None
         }
-        _ => {
-            new_error(format!("argument to `last` must be ARRAY, got {}",
-                              args[0].object_type()))
-        }
+    } else {
+        new_error(format!("argument to `last` must be ARRAY, got {}",
+                          args[0].object_type()))
     };
 }
 
-fn rest(args: &Vec<ValueObject>) -> ValueObject {
+fn rest(args: &Vec<Rc<dyn object::Object>>) -> Option<Rc<dyn object::Object>> {
     if args.len() != 1 {
         return new_error(format!("wrong number of arguments. got={}, want=1", args.len()));
     }
 
-    return match &args[0] {
-        ValueObject::Array(v) => {
-            let length = v.elements.len();
-            if length > 0 {
-                let mut ary: Vec<ValueObject> = vec![];
-                for i in 1..length {
-                    ary.push(v.elements[i].clone());
-                }
-                ValueObject::Array(object::Array {
-                    elements: ary,
-                })
-            } else {
-                ValueObject::NULL
+    let any = args[0].as_any();
+
+    return if any.is::<object::Array>() {
+        let v = any.downcast_ref::<object::Array>().unwrap();
+        let length = v.elements.len();
+        if length > 0 {
+            let mut ary: Vec<Rc<dyn object::Object>> = vec![];
+            for i in 1..length {
+                ary.push(v.elements[i].clone());
             }
+            Some(Rc::new(object::Array {
+                elements: ary,
+            }))
+        } else {
+            None
         }
-        _ => {
-            new_error(format!("argument to `rest` must be ARRAY, got {}",
-                              args[0].object_type()))
-        }
+    } else {
+        new_error(format!("argument to `first` must be ARRAY, got {}",
+                          args[0].object_type()))
     };
 }
 
-fn push(args: &Vec<ValueObject>) -> ValueObject {
+fn push(args: &Vec<Rc<dyn object::Object>>) -> Option<Rc<dyn object::Object>> {
     if args.len() != 2 {
         return new_error(format!("wrong number of arguments. got={}, want=2", args.len()));
     }
 
-    return match &args[0] {
-        ValueObject::Array(v) => {
-            let mut ary: Vec<ValueObject> = vec![];
-            for item in &v.elements {
-                ary.push(item.clone());
-            }
-            ary.push(args[1].clone());
-            ValueObject::Array(object::Array {
-                elements: ary,
-            })
+    let any = args[0].as_any();
+
+    return if any.is::<object::Array>() {
+        let v = any.downcast_ref::<object::Array>().unwrap();
+        let mut ary: Vec<Rc<dyn object::Object>> = vec![];
+        for item in &v.elements {
+            ary.push(item.clone());
         }
-        _ => {
-            new_error(format!("argument to `push` must be ARRAY, got {}",
-                              args[0].object_type()))
-        }
+        ary.push(args[1].clone());
+        Some(Rc::new(object::Array {
+            elements: ary,
+        }))
+    } else {
+        new_error(format!("argument to `push` must be ARRAY, got {}",
+                          args[0].object_type()))
     };
 }
 

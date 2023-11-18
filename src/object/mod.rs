@@ -1,7 +1,9 @@
+use core::any::Any;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use crate::ast::ASTNode;
+use crate::ast;
+use crate::ast::Node;
 pub use crate::object::base::*;
 pub use crate::object::environment::Environment;
 
@@ -10,146 +12,133 @@ mod base;
 mod object_test;
 
 
-pub type BuiltinFunction = dyn Fn(&Vec<ValueObject>) -> ValueObject;
+macro_rules! downcast_trait_impl {
+    ($impl_name:ident) => {
+        impl Downcast for $impl_name {
+            fn as_any(&self) -> &dyn Any
+                where Self: Sized
+            {
+                self
+            }
 
-
-#[derive(Clone)]
-pub enum ValueObject {
-    Integer(i64),
-    Boolean(bool),
-    StringValue(String),
-    ReturnValue(ReturnValue),
-    Error(String),
-    Function(Function),
-    Builtin(Builtin),
-    Array(Array),
-    Hash(Hash),
-    NULL,
-    None,
-}
-
-impl ValueObject {
-    pub fn is_none(&self) -> bool {
-        return match self {
-            ValueObject::None => { true }
-            _ => { false }
-        };
-    }
-
-    pub fn is_null(&self) -> bool {
-        return match self {
-            ValueObject::NULL => { true }
-            _ => { false }
-        };
-    }
-
-    #[allow(dead_code)]
-    pub fn as_int(&self) -> i64 {
-        return match self {
-            ValueObject::Integer(v) => { *v }
-            _ => { 0 }
-        };
-    }
-
-    #[allow(dead_code)]
-    pub fn as_string(&self) -> String {
-        return match self {
-            ValueObject::StringValue(v) => { v.clone() }
-            _ => { "".to_string() }
-        };
-    }
-
-    #[allow(dead_code)]
-    pub fn as_bool(&self) -> bool {
-        return match self {
-            ValueObject::Boolean(v) => { *v }
-            _ => { false }
-        };
-    }
-    pub fn inspect(&self) -> String {
-        match self {
-            ValueObject::Integer(v) => { format!("{}", v) }
-            ValueObject::Boolean(v) => { format!("{}", v) }
-            ValueObject::StringValue(v) => { format!("{}", v) }
-            ValueObject::NULL => { "NULL".to_string() }
-            ValueObject::ReturnValue(v) => { v.inspect() }
-            ValueObject::Error(v) => { format!("{}", v) }
-            ValueObject::Function(v) => { v.inspect() }
-            ValueObject::Builtin(v) => { v.inspect() }
-            ValueObject::Array(v) => { v.inspect() }
-            ValueObject::Hash(v) => { v.inspect() }
-            ValueObject::None => { "None".to_string() }
+            fn as_any_mut(&mut self) -> &mut dyn Any
+                where Self: Sized
+            {
+                self
+            }
         }
     }
-    pub fn object_type(&self) -> &str {
-        return match self {
-            ValueObject::Integer(_) => { INTEGER_OBJ }
-            ValueObject::Boolean(_) => { BOOLEAN_OBJ }
-            ValueObject::StringValue(_) => { STRING_OBJ }
-            ValueObject::ReturnValue(_) => { RETURN_VALUE_OBJ }
-            ValueObject::Error(_) => { ERROR_OBJ }
-            ValueObject::Function(_) => { FUNCTION_OBJ }
-            ValueObject::Builtin(_) => { BUILTIN_OBJ }
-            ValueObject::Array(_) => { ARRAY_OBJ }
-            ValueObject::Hash(_) => { HASH_OBJ }
-            ValueObject::NULL => { NULL_OBJ }
-            ValueObject::None => { NONE_OBJ }
-        };
+}
+
+pub struct Integer {
+    pub value: i64,
+}
+
+downcast_trait_impl!(Integer);
+
+impl Object for Integer {
+    fn object_type(&self) -> &'static ObjectType {
+        return INTEGER_OBJ;
     }
 
-    pub fn is_hash(&self) -> bool {
-        return match self {
-            ValueObject::Integer(_) => { true }
-            ValueObject::Boolean(_) => { true }
-            ValueObject::StringValue(_) => { true }
-            _ => { false }
-        };
+    fn inspect(&self) -> String {
+        format!("{}", self.value)
     }
 
-    pub fn hash_key(&self) -> HashKey {
-        return match self {
-            ValueObject::Integer(v) => {
-                HashKey {
-                    object_type: "Integer".to_string(),
-                    value: format!("{}", v),
-                }
-            }
-            ValueObject::Boolean(v) => {
-                HashKey {
-                    object_type: "Boolean".to_string(),
-                    value: format!("{}", v),
-                }
-            }
-            ValueObject::StringValue(v) => {
-                HashKey {
-                    object_type: "String".to_string(),
-                    value: format!("{}", v),
-                }
-            }
-            _ => { HashKey { object_type: "".to_string(), value: "".to_string() } }
-        };
+    fn is_hash(&self) -> bool { true }
+
+    fn hash_key(&self) -> Option<HashKey> {
+        Some(HashKey {
+            object_type: "Integer".to_string(),
+            value: format!("{}", self.value),
+        })
     }
 }
 
-#[derive(Clone)]
+pub struct Boolean {
+    pub value: bool,
+}
+
+downcast_trait_impl!(Boolean);
+
+impl Object for Boolean {
+    fn object_type(&self) -> &'static ObjectType {
+        return BOOLEAN_OBJ;
+    }
+
+    fn inspect(&self) -> String {
+        format!("{}", self.value)
+    }
+
+    fn is_hash(&self) -> bool { true }
+
+    fn hash_key(&self) -> Option<HashKey> {
+        Some(HashKey {
+            object_type: "Boolean".to_string(),
+            value: format!("{}", self.value),
+        })
+    }
+}
+
+pub struct NULL {}
+
+downcast_trait_impl!(NULL);
+
+impl Object for NULL {
+    fn object_type(&self) -> &'static ObjectType {
+        return NULL_OBJ;
+    }
+
+    fn inspect(&self) -> String {
+        "NULL".to_string()
+    }
+}
+
 pub struct ReturnValue {
-    pub value: Box<ValueObject>,
+    pub value: Rc<dyn Object>,
 }
 
-impl ReturnValue {
+downcast_trait_impl!(ReturnValue);
+
+impl Object for ReturnValue {
+    fn object_type(&self) -> &'static ObjectType {
+        return RETURN_VALUE_OBJ;
+    }
+
     fn inspect(&self) -> String {
         self.value.inspect()
     }
 }
 
-#[derive(Clone)]
-pub struct Function {
-    pub parameters: Vec<ASTNode>,
-    pub body: Box<ASTNode>,
-    pub env: Box<Environment>,
+pub struct Error {
+    pub message: String,
 }
 
-impl Function {
+downcast_trait_impl!(Error);
+
+impl Object for Error {
+    fn object_type(&self) -> &'static ObjectType {
+        return ERROR_OBJ;
+    }
+
+    fn inspect(&self) -> String {
+        self.message.clone()
+    }
+}
+
+pub struct Function {
+    pub parameters: Vec<ast::Identifier>,
+    pub body: Rc<dyn ast::Statement>,
+    pub env: Rc<Environment>,
+}
+
+downcast_trait_impl!(Function);
+
+impl Object for Function {
+    fn object_type(&self) -> &'static ObjectType {
+        return FUNCTION_OBJ;
+    }
+
     fn inspect(&self) -> String {
         let mut params: Vec<String> = Vec::new();
         for v in &self.parameters {
@@ -159,23 +148,58 @@ impl Function {
     }
 }
 
-#[derive(Clone)]
+pub struct StringValue {
+    pub value: String,
+}
+
+downcast_trait_impl!(StringValue);
+
+impl Object for StringValue {
+    fn object_type(&self) -> &'static ObjectType {
+        return STRING_OBJ;
+    }
+
+    fn inspect(&self) -> String {
+        self.value.clone()
+    }
+
+    fn is_hash(&self) -> bool { true }
+
+    fn hash_key(&self) -> Option<HashKey> {
+        Some(HashKey {
+            object_type: "String".to_string(),
+            value: format!("{}", self.value),
+        })
+    }
+}
+
 pub struct Builtin {
     pub func: Rc<BuiltinFunction>,
 }
 
-impl Builtin {
+downcast_trait_impl!(Builtin);
+
+impl Object for Builtin {
+    fn object_type(&self) -> &'static ObjectType {
+        return BUILTIN_OBJ;
+    }
+
     fn inspect(&self) -> String {
         "builtin function".to_string()
     }
 }
 
-#[derive(Clone)]
 pub struct Array {
-    pub elements: Vec<ValueObject>,
+    pub elements: Vec<Rc<dyn Object>>,
 }
 
-impl Array {
+downcast_trait_impl!(Array);
+
+impl Object for Array {
+    fn object_type(&self) -> &'static ObjectType {
+        return ARRAY_OBJ;
+    }
+
     fn inspect(&self) -> String {
         let mut elements: Vec<String> = Vec::new();
         for v in &self.elements {
@@ -186,18 +210,22 @@ impl Array {
     }
 }
 
-#[derive(Clone)]
 pub struct HashPair {
-    pub key: Box<ValueObject>,
-    pub value: Box<ValueObject>,
+    pub key: Rc<dyn Object>,
+    pub value: Rc<dyn Object>,
 }
 
-#[derive(Clone)]
 pub struct Hash {
     pub pairs: HashMap<HashKey, HashPair>,
 }
 
-impl Hash {
+downcast_trait_impl!(Hash);
+
+impl Object for Hash {
+    fn object_type(&self) -> &'static ObjectType {
+        return HASH_OBJ;
+    }
+
     fn inspect(&self) -> String {
         let mut pairs: Vec<String> = Vec::new();
         for (_, value) in self.pairs.iter() {

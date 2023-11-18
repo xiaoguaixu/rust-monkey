@@ -2,7 +2,7 @@
 //
 // pub trait Downcast {
 //     fn as_any(&self) -> &dyn Any;
-//     fn as_point_any<'a>(self: & 'a Box<Self>) -> &'a dyn Any where Self: Sized;
+//     fn as_point_any<'a>(self: & 'a Box<Self>) -> &'a dyn Any;
 // }
 //
 // pub trait YourTrait: Downcast {

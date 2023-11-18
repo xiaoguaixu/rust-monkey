@@ -1,54 +1,63 @@
+use std::rc::Rc;
+
 use crate::{ast, token};
-use crate::ast::ASTNode;
 use crate::parser::base::{ParseContext, Precedence};
 use crate::parser::func_base::{parse_expression, parse_expression_list};
 
-pub fn parse_infix_expression(context: &mut Box<ParseContext>, left_expression: ASTNode) -> ASTNode {
+pub fn parse_infix_expression(context: &mut Box<ParseContext>, left_expression: Rc<dyn ast::Expression>) -> Option<Rc<dyn ast::Expression>> {
     let left = left_expression;
     let precedence = context.cur_precedence();
     let operator = context.cur_token.literal.clone();
     let token = context.cur_token.clone();
 
     context.next_token();
-    let right = parse_expression(context, precedence);
-    if let ASTNode::None = right {
-        return ASTNode::None;
+    let right = match parse_expression(context, precedence) {
+        None => {
+            return None;
+        }
+        Some(v) => {
+            v
+        }
     };
 
-    ASTNode::InfixExpression(ast::InfixExpression {
+    Some(Rc::new(ast::InfixExpression {
         token,
-        left: Box::new(left),
+        left,
         operator,
-        right: Box::new(right),
-    })
+        right,
+    }))
 }
 
-pub fn parse_call_expression(context: &mut Box<ParseContext>, left_expression: ASTNode) -> ASTNode {
+pub fn parse_call_expression(context: &mut Box<ParseContext>, left_expression: Rc<dyn ast::Expression>) -> Option<Rc<dyn ast::Expression>> {
     let arguments = parse_expression_list(context, token::RPAREN);
-    ASTNode::CallExpression(ast::CallExpression {
+    Some(Rc::new(ast::CallExpression {
         token: context.cur_token.clone(),
-        function: Box::new(left_expression),
+        function: left_expression,
         arguments,
-    })
+    }))
 }
 
-pub fn parse_index_expression(context: &mut Box<ParseContext>, left_expression: ASTNode) -> ASTNode {
+pub fn parse_index_expression(context: &mut Box<ParseContext>, left_expression: Rc<dyn ast::Expression>) -> Option<Rc<dyn ast::Expression>> {
     let token = context.cur_token.clone();
     context.next_token();
 
-    let index = parse_expression(context, Precedence::LOWEST as i32);
-    if let ASTNode::None = index {
-        return ASTNode::None;
+    let index = match parse_expression(context, Precedence::LOWEST as i32) {
+        None => {
+            return None;
+        }
+        Some(v) => {
+            v
+        }
     };
 
     if !context.expect_peek(token::RBRACKET) {
-        return ASTNode::None;
+        return None;
     }
 
-    ASTNode::IndexExpression(ast::IndexExpression {
+    Some(Rc::new(ast::IndexExpression {
         token,
-        left: Box::new(left_expression),
-        index: Box::new(index),
-    })
+        left: left_expression,
+        index,
+    }))
 }
 

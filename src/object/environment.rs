@@ -1,10 +1,11 @@
 use std::collections::HashMap;
+use std::rc::Rc;
 
-use crate::object::ValueObject;
+use crate::object::Object;
 
 #[derive(Clone)]
 pub struct Environment {
-    pub store: HashMap<String, Box<ValueObject>>,
+    pub store: HashMap<String, Rc<dyn Object>>,
     pub outer: Option<Box<Environment>>,
 }
 
@@ -22,8 +23,8 @@ impl Environment {
             outer: Some(Box::new(outer.clone())),
         }
     }
-
-    pub fn get(&self, name: &str) -> Option<&Box<ValueObject>> {
+    #[allow(dead_code)]
+    pub fn get(&self, name: &str) -> Option<&Rc<dyn Object>> {
         return match self.store.get(name) {
             None => {
                 match &self.outer {
@@ -37,7 +38,8 @@ impl Environment {
         };
     }
 
-    pub fn set(&mut self, name: &str, value: Box<ValueObject>) {
+    #[allow(dead_code)]
+    pub fn set(&mut self, name: &str, value: Rc<dyn Object>) {
         self.store.insert(name.to_string(), value);
     }
 }

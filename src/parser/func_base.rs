@@ -1,26 +1,27 @@
+use std::rc::Rc;
+
 use crate::{ast, token};
-use crate::ast::ASTNode;
 use crate::parser::base::{ParseContext, Precedence};
 
-pub fn parse_expression(context: &mut Box<ParseContext>, precedence: i32) -> ASTNode {
+pub fn parse_expression(context: &mut Box<ParseContext>, precedence: i32) -> Option<Rc<dyn ast::Expression>> {
     let prefix = context.get_prefix_fn(context.cur_token.token_type.as_str());
     let mut left_exp = match prefix {
         None => {
-            return ASTNode::None;
+            return None;
         }
         Some(v) => {
             v(context)
         }
     };
 
-    while !left_exp.is_none() && !context.peek_token_is(token::SEMICOLON) && precedence < context.peek_precedence() {
+    while left_exp.is_some() && !context.peek_token_is(token::SEMICOLON) && precedence < context.peek_precedence() {
         match context.get_infix_fn(context.peek_token.token_type.as_str()) {
             None => {
                 return left_exp;
             }
             Some(v) => {
                 context.next_token();
-                left_exp = v(context, left_exp);
+                left_exp = v(context, left_exp.unwrap());
             }
         }
     }
@@ -28,7 +29,7 @@ pub fn parse_expression(context: &mut Box<ParseContext>, precedence: i32) -> AST
     left_exp
 }
 
-pub fn parse_function_parameters(context: &mut Box<ParseContext>) -> Vec<ASTNode> {
+pub fn parse_function_parameters(context: &mut Box<ParseContext>) -> Vec<ast::Identifier> {
     let mut identifiers = vec![];
 
     if context.peek_token_is(token::RPAREN) {
@@ -38,10 +39,10 @@ pub fn parse_function_parameters(context: &mut Box<ParseContext>) -> Vec<ASTNode
 
     context.next_token();
 
-    let ident = ASTNode::Identifier(ast::Identifier {
+    let ident = ast::Identifier {
         token: context.cur_token.clone(),
         value: context.cur_token.literal.clone(),
-    });
+    };
 
     identifiers.push(ident);
 
@@ -49,10 +50,10 @@ pub fn parse_function_parameters(context: &mut Box<ParseContext>) -> Vec<ASTNode
         context.next_token();
         context.next_token();
 
-        let ident = ASTNode::Identifier(ast::Identifier {
+        let ident = ast::Identifier {
             token: context.cur_token.clone(),
             value: context.cur_token.literal.clone(),
-        });
+        };
         identifiers.push(ident);
     }
 
@@ -64,7 +65,7 @@ pub fn parse_function_parameters(context: &mut Box<ParseContext>) -> Vec<ASTNode
 }
 
 
-pub fn parse_expression_list(context: &mut Box<ParseContext>, end: &str) -> Vec<ASTNode> {
+pub fn parse_expression_list(context: &mut Box<ParseContext>, end: &str) -> Vec<Rc<dyn ast::Expression>> {
     let mut expressions = vec![];
 
     if context.peek_token_is(end) {
@@ -79,15 +80,15 @@ pub fn parse_expression_list(context: &mut Box<ParseContext>, end: &str) -> Vec<
         return expressions;
     }
 
-    expressions.push(expression);
+    expressions.push(expression.unwrap());
 
     while context.peek_token_is(token::COMMA) {
         context.next_token();
         context.next_token();
 
         let expression = parse_expression(context, Precedence::LOWEST as i32);
-        if !expression.is_none() {
-            expressions.push(expression);
+        if expression.is_some() {
+            expressions.push(expression.unwrap());
         }
     }
 

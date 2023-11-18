@@ -1,8 +1,38 @@
+use std::fmt::Debug;
+use std::any::Any;
+use std::rc::Rc;
+
 use crate::{macro_node_trait_impl, token};
-use crate::ast::ASTNode;
+use crate::ast::base::*;
 
 macro_rules! express_trait_impl {
     ($impl_name:ident) => {
+        impl Expression for $impl_name {
+            fn expression_node(&self) {
+            }
+
+            fn upcast(&self) ->&dyn Node {
+                self
+            }
+        }
+
+
+        impl $impl_name {
+            #[allow(dead_code)]
+            pub fn from_expression<'a>(expression: &'a Box<dyn Expression> ) -> Option<& 'a $impl_name> {
+                match expression.as_any().downcast_ref::<$impl_name>() {
+                    None => {None}
+                    Some(v) => {Some(v)}
+                }
+            }
+
+            pub fn from_node<'a>(node: &'a Box<dyn Node>) -> Option<& 'a $impl_name> {
+                match node.as_any().downcast_ref::<$impl_name>() {
+                    None => {None}
+                    Some(v) => {Some(v)}
+                }
+            }
+        }
     }
 }
 
@@ -13,9 +43,9 @@ pub struct Identifier {
     pub value: String,
 }
 
-impl Identifier {
+impl Node for Identifier {
     macro_node_trait_impl!(Identifier);
-    pub fn string(&self) -> String {
+    fn string(&self) -> String {
         self.value.clone()
     }
 }
@@ -23,91 +53,89 @@ impl Identifier {
 express_trait_impl!(Identifier);
 
 
-#[derive(Clone)]
 pub struct Boolean {
     pub token: token::Token,
     pub value: bool,
 }
 
-impl Boolean {
+impl Node for Boolean {
     macro_node_trait_impl!(Boolean);
 
-    pub fn string(&self) -> String {
+    fn string(&self) -> String {
         self.token.literal.clone()
     }
 }
 
 express_trait_impl!(Boolean);
 
-#[derive(Clone)]
+
 pub struct IntegerLiteral {
     pub token: token::Token,
     pub value: i64,
 }
 
-impl IntegerLiteral {
+impl Node for IntegerLiteral {
     macro_node_trait_impl!(IntegerLiteral);
 
-    pub fn string(&self) -> String {
+    fn string(&self) -> String {
         self.token.literal.clone()
     }
 }
 
 express_trait_impl!(IntegerLiteral);
 
-#[derive(Clone)]
+
 pub struct PrefixExpression {
     pub token: token::Token,
     pub operator: String,
-    pub right: Box<ASTNode>,
+    pub right: Rc<dyn Expression>,
 }
 
-impl PrefixExpression {
+impl Node for PrefixExpression {
     macro_node_trait_impl!(PrefixExpression);
 
-    pub fn string(&self) -> String {
+    fn string(&self) -> String {
         format!("({}{})", self.operator, self.right.string())
     }
 }
 
 express_trait_impl!(PrefixExpression);
 
-#[derive(Clone)]
 pub struct InfixExpression {
     pub token: token::Token,
     // The operator token, e.g. +
-    pub left: Box<ASTNode>,
+    pub left: Rc<dyn Expression>,
     pub operator: String,
-    pub right: Box<ASTNode>,
+    pub right: Rc<dyn Expression>,
 }
 
-impl InfixExpression {
+impl Node for InfixExpression {
     macro_node_trait_impl!(InfixExpression);
 
-    pub fn string(&self) -> String {
+    fn string(&self) -> String {
         format!("({} {} {})", self.left.string(), self.operator, self.right.string())
     }
 }
 
 express_trait_impl!(InfixExpression);
 
-#[derive(Clone)]
+
 pub struct IfExpression {
     pub token: token::Token,
-    pub condition: Box<ASTNode>,
-    pub consequence: Box<ASTNode>,
-    pub alternative: Box<ASTNode>,
+    pub condition: Rc<dyn Expression>,
+    pub consequence: Rc<dyn Statement>,
+    pub alternative: Option<Rc<dyn Statement>>,
 }
 
-impl IfExpression {
+impl Node for IfExpression {
     macro_node_trait_impl!(IfExpression);
 
-    pub fn string(&self) -> String {
+    fn string(&self) -> String {
         let mut rlt = format!("if {} {}", self.condition.string(), self.consequence.string());
-        match *self.alternative {
-            ASTNode::None => {}
-            _ => {
-                rlt = format!("{} else {}", rlt, self.alternative.string());
+        match &self.alternative {
+            None => {}
+            Some(v) => {
+                rlt = format!("{} else {}", rlt, v.string());
             }
         }
         rlt
@@ -119,14 +147,14 @@ express_trait_impl!(IfExpression);
 #[derive(Clone)]
 pub struct FunctionLiteral {
     pub token: token::Token,
-    pub parameters: Vec<ASTNode>,
-    pub body: Box<ASTNode>,
+    pub parameters: Vec<Identifier>,
+    pub body: Rc<dyn Statement>,
 }
 
-impl FunctionLiteral {
+impl Node for FunctionLiteral {
     macro_node_trait_impl!(FunctionLiteral);
 
-    pub fn string(&self) -> String {
+    fn string(&self) -> String {
         let mut params: Vec<String> = Vec::new();
         for v in &self.parameters {
             params.push(v.string());
@@ -137,17 +165,15 @@ impl FunctionLiteral {
 
 express_trait_impl!(FunctionLiteral);
 
-#[derive(Clone)]
 pub struct CallExpression {
     pub token: token::Token,
-    pub function: Box<ASTNode>,
-    pub arguments: Vec<ASTNode>,
+    pub function: Rc<dyn Expression>,
+    pub arguments: Vec<Rc<dyn Expression>>,
 }
 
-
-impl CallExpression {
+impl Node for CallExpression {
     macro_node_trait_impl!(CallExpression);
-    pub fn string(&self) -> String {
+    fn string(&self) -> String {
         let mut args: Vec<String> = Vec::new();
         for v in &self.arguments {
             args.push(v.string());
@@ -159,30 +185,28 @@ impl CallExpression {
 
 express_trait_impl!(CallExpression);
 
-#[derive(Clone)]
 pub struct StringLiteral {
     pub token: token::Token,
     pub value: String,
 }
 
-impl StringLiteral {
+impl Node for StringLiteral {
     macro_node_trait_impl!(StringLiteral);
-    pub fn string(&self) -> String {
+    fn string(&self) -> String {
         self.token.literal.clone()
     }
 }
 
 express_trait_impl!(StringLiteral);
 
-#[derive(Clone)]
 pub struct ArrayLiteral {
     pub token: token::Token,
-    pub elements: Vec<ASTNode>,
+    pub elements: Vec<Rc<dyn Expression>>,
 }
 
-impl ArrayLiteral {
+impl Node for ArrayLiteral {
     macro_node_trait_impl!(ArrayLiteral);
-    pub fn string(&self) -> String {
+    fn string(&self) -> String {
         let mut elements: Vec<String> = Vec::new();
         for v in &self.elements {
             elements.push(v.string());
@@ -193,31 +217,29 @@ impl ArrayLiteral {
 
 express_trait_impl!(ArrayLiteral);
 
-#[derive(Clone)]
 pub struct IndexExpression {
     pub token: token::Token,
-    pub left: Box<ASTNode>,
-    pub index: Box<ASTNode>,
+    pub left: Rc<dyn Expression>,
+    pub index: Rc<dyn Expression>,
 }
 
-impl IndexExpression {
+impl Node for IndexExpression {
     macro_node_trait_impl!(IndexExpression);
-    pub fn string(&self) -> String {
+    fn string(&self) -> String {
         format!("({}[{}])", self.left.string(), self.index.string())
     }
 }
 
 express_trait_impl!(IndexExpression);
 
-#[derive(Clone)]
 pub struct HashLiteral {
     pub token: token::Token,
-    pub pairs: Vec<(Box<ASTNode>, Box<ASTNode>)>,
+    pub pairs: Vec<(Rc<dyn Expression>, Rc<dyn Expression>)>,
 }
 
-impl HashLiteral {
+impl Node for HashLiteral {
     macro_node_trait_impl!(HashLiteral);
-    pub fn string(&self) -> String {
+    fn string(&self) -> String {
         let mut pairs: Vec<String> = Vec::new();
         for (key, value) in self.pairs.iter() {
             pairs.push(key.string() + ":" + value.string().as_str());

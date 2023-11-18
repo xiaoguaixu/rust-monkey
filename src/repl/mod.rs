@@ -19,10 +19,13 @@ pub fn start() {
             print_parser_errors(&p.errors());
         }
 
-        let evaluated = eval(&program, &mut env);
-        if !evaluated.is_null() && !evaluated.is_none() {
-            println!("{}", evaluated.inspect());
+        let evaluated = eval(&*program, &mut env);
+        if evaluated.is_none() {
+            continue;
         }
+        let evaluated = evaluated.unwrap();
+
+        println!("{}", evaluated.inspect());
     }
 }
 

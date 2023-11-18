@@ -1,29 +1,55 @@
+use std::any::Any;
+use std::rc::Rc;
+
 use crate::{macro_node_trait_impl, token};
-use crate::ast::ASTNode;
+use crate::ast::{Expression, Node, Statement};
+use crate::ast::expression::Identifier;
 
 macro_rules! macro_statement_trait_impl {
     ($impl_name:ident) => {
+        impl Statement for $impl_name {
+            fn statement_node(&self) {
+            }
+
+            fn upcast(&self) ->&dyn Node {
+                self
+            }
+        }
+
         impl $impl_name {
+            #[allow(dead_code)]
+            pub fn from_statement<'a>(statement: &'a Box<dyn Statement> ) -> Option<& 'a $impl_name> {
+                match statement.as_any().downcast_ref::<$impl_name>() {
+                    None => {None}
+                    Some(v) => {Some(v)}
+                }
+            }
+
+            pub fn from_node<'a>(node: &'a Box<dyn Node>) -> Option<& 'a $impl_name> {
+                match node.as_any().downcast_ref::<$impl_name>() {
+                    None => {None}
+                    Some(v) => {Some(v)}
+                }
+            }
         }
     }
 }
 
-#[derive(Clone)]
 pub struct LetStatement {
     pub token: token::Token,
-    pub name: Box<ASTNode>,
-    pub value: Box<ASTNode>,
+    pub name: Rc<Identifier>,
+    pub value: Option<Rc<dyn Expression>>,
 }
 
-impl LetStatement {
+impl Node for LetStatement {
     macro_node_trait_impl!(LetStatement);
-    pub fn string(&self) -> String {
+    fn string(&self) -> String {
         let mut rlt = format!("{} {}", self.token.literal, self.name.string());
-        match &*self.value {
-            ASTNode::Identifier(v) => {
+        match &self.value {
+            None => {}
+            Some(v) => {
                 rlt = rlt + " = " + v.token_literal();
             }
-            _ => {}
         }
         rlt
     }
@@ -31,21 +57,20 @@ impl LetStatement {
 
 macro_statement_trait_impl!(LetStatement);
 
-#[derive(Clone)]
 pub struct ReturnStatement {
     pub token: token::Token,
-    pub return_value: Box<ASTNode>,
+    pub return_value: Option<Rc<dyn Expression>>,
 }
 
-impl ReturnStatement {
+impl Node for ReturnStatement {
     macro_node_trait_impl!(ReturnStatement);
-    pub fn string(&self) -> String {
-        match *self.return_value {
-            ASTNode::None => {
+    fn string(&self) -> String {
+        match &self.return_value {
+            None => {
                 format!("{} ;", self.token.literal)
             }
-            _ => {
-                format!("{} {} ", self.token.literal, self.return_value.token_literal())
+            Some(v) => {
+                format!("{} {} ", self.token.literal, v.token_literal())
             }
         }
     }
@@ -53,30 +78,28 @@ impl ReturnStatement {
 
 macro_statement_trait_impl!(ReturnStatement);
 
-#[derive(Clone)]
 pub struct ExpressionStatement {
     pub token: token::Token,
-    pub expression: Box<ASTNode>,
+    pub expression: Rc<dyn Expression>,
 }
 
-impl ExpressionStatement {
+impl Node for ExpressionStatement {
     macro_node_trait_impl!(ExpressionStatement);
-    pub fn string(&self) -> String {
+    fn string(&self) -> String {
         self.expression.string()
     }
 }
 
 macro_statement_trait_impl!(ExpressionStatement);
 
-#[derive(Clone)]
 pub struct BlockStatement {
     pub token: token::Token,
-    pub statements: Vec<ASTNode>,
+    pub statements: Vec<Box<dyn Statement>>,
 }
 
-impl BlockStatement {
+impl Node for BlockStatement {
     macro_node_trait_impl!(BlockStatement);
-    pub fn string(&self) -> String {
+    fn string(&self) -> String {
         let mut rlt: String = "".to_string();
         for v in &self.statements {
             rlt = rlt + v.string().as_str();
