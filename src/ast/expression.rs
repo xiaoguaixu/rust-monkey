@@ -19,15 +19,8 @@ macro_rules! express_trait_impl {
 
         impl $impl_name {
             #[allow(dead_code)]
-            pub fn from_expression<'a>(expression: &'a Box<dyn Expression> ) -> Option<& 'a $impl_name> {
+            pub fn from_expression<'a>(expression: &'a Rc<dyn Expression> ) -> Option<& 'a $impl_name> {
                 match expression.as_any().downcast_ref::<$impl_name>() {
-                    None => {None}
-                    Some(v) => {Some(v)}
-                }
-            }
-
-            pub fn from_node<'a>(node: &'a Box<dyn Node>) -> Option<& 'a $impl_name> {
-                match node.as_any().downcast_ref::<$impl_name>() {
                     None => {None}
                     Some(v) => {Some(v)}
                 }

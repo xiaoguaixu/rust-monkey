@@ -24,13 +24,6 @@ macro_rules! macro_statement_trait_impl {
                     Some(v) => {Some(v)}
                 }
             }
-
-            pub fn from_node<'a>(node: &'a Rc<dyn Node>) -> Option<& 'a $impl_name> {
-                match node.as_any().downcast_ref::<$impl_name>() {
-                    None => {None}
-                    Some(v) => {Some(v)}
-                }
-            }
         }
     }
 }
