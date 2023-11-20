@@ -1,4 +1,5 @@
 use std::rc::Rc;
+use std::collections::HashMap;
 
 use crate::evaluator::base::new_error;
 use crate::object;
@@ -124,14 +125,39 @@ fn push(args: &Vec<Rc<dyn object::Object>>) -> Option<Rc<dyn object::Object>> {
     };
 }
 
+
+
+thread_local! {
+    pub static BUILTIN_FN: HashMap<&'static str, Rc<BuiltinFunction> > = init_builtin_fun_map();
+}
+
 pub fn get_builtin_fn(key: &str) -> Option<Rc<BuiltinFunction>> {
-    return match key {
-        "len" => { Some(Rc::new(len)) }
-        "puts" => { Some(Rc::new(puts)) }
-        "first" => { Some(Rc::new(first)) }
-        "last" => { Some(Rc::new(last)) }
-        "rest" => { Some(Rc::new(rest)) }
-        "push" => { Some(Rc::new(push)) }
-        _ => { None }
-    };
+    // return match key {
+    //     "len" => { Some(Rc::new(len)) }
+    //     "puts" => { Some(Rc::new(puts)) }
+    //     "first" => { Some(Rc::new(first)) }
+    //     "last" => { Some(Rc::new(last)) }
+    //     "rest" => { Some(Rc::new(rest)) }
+    //     "push" => { Some(Rc::new(push)) }
+    //     _ => { None }
+    // };
+
+    BUILTIN_FN.with(|val|{
+        if let Some(v) = val.get(key) {
+            return Some(v.clone());
+        }
+        return None;
+    })
+}
+
+pub  fn init_builtin_fun_map() -> HashMap<&'static str, Rc<BuiltinFunction> > {
+    let mut rlt: HashMap<&'static str, Rc<BuiltinFunction> > = HashMap::new();
+    rlt.insert("len", Rc::new(len));
+    rlt.insert("puts", Rc::new(puts));
+    rlt.insert("first",Rc::new(first));
+    rlt.insert("last",Rc::new(last));
+    rlt.insert("rest", Rc::new(rest));
+    rlt.insert("push", Rc::new(push));
+
+    return rlt;
 }

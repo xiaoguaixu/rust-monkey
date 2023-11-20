@@ -1,7 +1,7 @@
 use std::any::Any;
 use std::rc::Rc;
 
-use crate::const_str_val_declare;
+use crate::{const_str_val_declare, object};
 
 pub type ObjectType = str;
 
@@ -43,5 +43,5 @@ pub trait Object: Downcast {
     }
 }
 
-pub type BuiltinFunction = dyn Fn(&Vec<Rc<dyn Object>>) -> Option<Rc<dyn Object>>;
+pub type BuiltinFunction = dyn Fn(&Vec<Rc<dyn object::Object>>) -> Option<Rc<dyn object::Object>>;
 
